@@ -4,7 +4,7 @@ import asyncio, json
 from json.decoder import JSONDecodeError
 import urllib.request
 from pyrogram import Client, filters
-from main import cmd, par, des
+from main import cmd, par, des, prefix_str
 
 
 cmd.extend(['rate'])
@@ -37,7 +37,7 @@ def init():
 init()
 
 
-@Client.on_message(filters.me & filters.command('rate', list('.:!')))
+@Client.on_message(filters.me & filters.command('rate', list(prefix_str)))
 async def rate(client, message):
     while not inited:
         await asyncio.sleep(1)
