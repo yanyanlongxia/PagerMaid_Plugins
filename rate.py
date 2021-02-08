@@ -3,7 +3,13 @@
 import asyncio, json
 from json.decoder import JSONDecodeError
 import urllib.request
-from pagermaid.listener import listener
+from pyrogram import Client, filters
+from main import cmd, par, des
+
+
+cmd.extend(['rate'])
+par.extend(['<FROM> <TO> <NB>'])
+des.extend(['货币汇率。'])
 
 API = "https://api.exchangeratesapi.io/latest"
 currencies = []
@@ -31,30 +37,28 @@ def init():
 init()
 
 
-@listener(is_plugin=True, outgoing=True, command="rate",
-          description="货币汇率插件",
-          parameters="<FROM> <TO> <NB>")
-async def rate(context):
+@Client.on_message(filters.me & filters.command('rate', list('.:!')))
+async def rate(client, message):
     while not inited:
         await asyncio.sleep(1)
-    if not context.parameter:
-        await context.edit(
+    if len(message.text.split()) == 1:
+        await message.edit(
             f"这是货币汇率插件\n\n使用方法: `-rate <FROM> <TO> <NB>`\n\n支持货币: \n{', '.join(currencies)}")
         return
-    if len(context.parameter) != 3:
-        await context.edit(f"使用方法: `-rate <FROM> <TO> <NB>`\n\n支持货币: \n{', '.join(currencies)}")
+    if len(message.text.split()) != 4:
+        await message.edit(f"使用方法: `-rate <FROM> <TO> <NB>`\n\n支持货币: \n{', '.join(currencies)}")
         return
-    FROM = context.parameter[0].upper().strip()
-    TO = context.parameter[1].upper().strip()
+    FROM = message.text.split()[1].upper().strip()
+    TO = message.text.split()[2].upper().strip()
     try:
-        NB = float(context.parameter[2].strip())
+        NB = float(message.text.split()[3].strip())
     except:
         NB = 1.0
     if currencies.count(FROM) == 0:
-        await context.edit(
+        await message.edit(
             f"{FROM}不是支持的货币. \n\n支持货币: \n{', '.join(currencies)}")
         return
     if currencies.count(TO) == 0:
-        await context.edit(f"{TO}不是支持的货币. \n\n支持货币: \n{', '.join(currencies)}")
+        await message.edit(f"{TO}不是支持的货币. \n\n支持货币: \n{', '.join(currencies)}")
         return
-    await context.edit(f'{FROM} : {TO} = {NB} : {round(data["rates"][TO]/data["rates"][FROM]*NB,2)}')
+    await message.edit(f'{FROM} : {TO} = {NB} : {round(data["rates"][TO]/data["rates"][FROM]*NB,2)}')
