@@ -9,6 +9,16 @@
             "supported": true,
             "des-short": "汇率转换。",
             "des": "这个人很懒，什么都没有留下。"
+        },
+        {
+            "name": "vip",
+            "version": "0.2",
+            "section": "chat",
+            "maintainer": "xtaodada",
+            "size": "4.0 kb",
+            "supported": true,
+            "des-short": "vip 捐赠用户功能",
+            "des": "命令：天气：weather Pixiv：pixiv。"
         }
     ]
 }
