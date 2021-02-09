@@ -19,6 +19,36 @@
             "supported": true,
             "des-short": "vip 捐赠用户功能",
             "des": "命令：天气：weather Pixiv：pixiv。"
+        },
+        {
+            "name": "keyword",
+            "version": "2.5",
+            "section": "chat",
+            "maintainer": "c3b2a, xtaodada",
+            "size": "33.2 kb",
+            "supported": true,
+            "des-short": "关键词回复插件。",
+            "des": "命令：keyword, replyset, funcset。"
+        },
+        {
+            "name": "avoid",
+            "version": "0.1",
+            "section": "chat",
+            "maintainer": "xtaodada",
+            "size": "3.70 kb",
+            "supported": true,
+            "des-short": "自动处理消息。",
+            "des": "命令：deny, ghost"
+        },
+        {
+            "name": "incoming",
+            "version": "0.1",
+            "section": "chat",
+            "maintainer": "xtaodada",
+            "size": "0.74 kb",
+            "supported": true,
+            "des-short": "自动处理消息关键依赖。",
+            "des": "关键依赖"
         }
     ]
 }
