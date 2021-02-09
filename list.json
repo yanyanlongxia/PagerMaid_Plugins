@@ -49,6 +49,26 @@
             "supported": true,
             "des-short": "自动处理消息关键依赖。",
             "des": "关键依赖"
+        },
+        {
+            "name": "dme",
+            "version": "1.1",
+            "section": "chat",
+            "maintainer": "xtaodada",
+            "size": "8.0 kb",
+            "supported": true,
+            "des-short": "反 TG desktop 防撤回插件。",
+            "des": "编辑并删除当前对话您发送的特定数量的消息。支持 Redis 记录上一次指定的文本，方便快速撤回消息。 最近更新：防止编辑消息报错。"
+        },
+        {
+            "name": "transfer",
+            "version": "0.1",
+            "section": "chat",
+            "maintainer": "c3b2a, xtaodada",
+            "size": "4.0 kb",
+            "supported": true,
+            "des-short": "上传 / 下载文件。",
+            "des": "上传 / 下载文件。"
         }
     ]
 }
