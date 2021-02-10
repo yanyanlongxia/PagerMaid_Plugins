@@ -1,6 +1,6 @@
 # PagerMaid_Plugins
 
-这个 repo 用于存储 PagerMaid-Modify 的插件。
+这个 repo 用于存储 PagerMaid-Modify Beta 的插件。
 
 ## 如何上传插件？
 
@@ -48,44 +48,14 @@
 ## 目前已有的插件
 
 - chat （聊天类）
-    - `autorespond` : 自动回复。
+    - `avoid` : 自动已读。
     - `dme` : 反 TG desktop 防撤回插件。
-    - `autorm` : 在指定的时间后删除自己的消息。
-    - `sendat` : 定时发送消息。
-    - `atadmins_atall` : 一键 AT 本群管理员、群员。
-    - `denyu` : 在某群中强制禁言某用户。
-    - `nthmsg` : 获取你发送的第 n 条消息。
-    - `portball` : 回复你要临时禁言的人的消息来实现XX秒的禁言。
-    - `da` : 删除所有信息。
-    - `diss` : 祖安对线语录。
-    - `shangliu` : 上流对话工具。
-    - `killallmembers` : 一键扬了群。
-    - `aff` : 光速发Aff信息。
-    - `stickertopic` : 贴纸转图片。
     - `vip` : vip 捐赠用户功能。
-    - `calculator` : 小型计算器。
-    - `paolu` : 一键跑路（删所有消息并禁言）。
     - `keyword` : 群组关键词自动回复插件。
-    - `msgst` : 每天定时发送消息。
+    - `ghs` : 搞颜色。
 - profile （资料类）
-    - `autochangename` : 自动更新 last_name 为时间等。
-    - `throwit` : 生成一张 扔头像 图片。
-    - `mjx` : 随机带评价买家秀，随机涩气买家秀。
-    - `eat` : 生成一张 吃头像 图片。
+    - 暂无
 - daily （便民类）
-    - `weather` : 查询天气。
-    - `xtao-some` : 一大堆便民功能。
-    - `yb-dl` : 上传 Youtube、Bilibili 视频到 telegram。
     - `rate` : 汇率转换。
-    - `netease` : 随机一条网易云音乐热评。
-    - `hyperlink` : 生成隐藏链接。
-    - `resou` : 微博，知乎，抖音实时热搜，B站实时排行榜。
-    - `tel` : 查询手机号码归属地等信息。
-    - `whois` : 查询域名whois信息。
-    - `cosplay-multi` : 多网站随机获取Cos图。
-    - `meizi` : 多网站随机获取写真。
-    - `acg-multi` : 多网站随机获取ACG图。
-    - `neteaseshuffle` : 随机网抑热歌。
     - `neteasemusic` : 网易云搜歌/随机热歌/点歌。
-    - `videodl` : 下载YTB/B站视频。
     - `transfer` : 上传和下载文件。
