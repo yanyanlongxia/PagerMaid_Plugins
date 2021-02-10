@@ -1,5 +1,5 @@
 import re, time, asyncio, requests, os, json
-from io import BytesIO
+from sys import exit
 from os import path, mkdir, remove, makedirs
 from shutil import copyfile, move, rmtree
 from uuid import uuid4
@@ -176,7 +176,7 @@ async def send_reply(bot, chat_id, trigger, mode, reply_msg, context):
     try:
         real_chat_id = chat_id
         chat = context.chat
-        sender = context.sender
+        sender = context.from_user
         replace_data = {}
         if chat_id < 0:
             replace_data = {
@@ -249,9 +249,11 @@ async def send_reply(bot, chat_id, trigger, mode, reply_msg, context):
                                     f.write(fileget.content)
                         reply_to = None
                         if "reply" in type_parse:
-                            reply_to = context.id
-                        await bot.send_file(chat_id, filename,
-                                            reply_to=reply_to, force_document=("file" in type_parse))
+                            reply_to = context.message_id
+                        if "file" in type_parse:
+                            await bot.send_document(chat_id, filename, reply_to_message_id=reply_to)
+                        else:
+                            await bot.send_photo(chat_id, filename, reply_to_message_id=reply_to)
                         if not is_opened:
                             remove(filename)
                 elif ("tgfile" in type_parse or "tgphoto" in type_parse) and len(re_msg.split()) >= 2:
@@ -261,38 +263,31 @@ async def send_reply(bot, chat_id, trigger, mode, reply_msg, context):
                             mkdir("/tmp")
                         re_data = re_msg.split()
                         file_name = "/tmp/" + re_data[0]
-                        _data = BytesIO()
-                        re_data[1] = re_data[1].split("/")[-2:]
+                        re_new_data = re_data[1].split("/")[-2:]
                         try:
-                            msg_chat_id = int(re_data[1][0])
+                            msg_chat_id = int('-100' + str(re_new_data[0]))
                         except:
-                            async with bot.conversation(re_data[1][0]) as conversation:
-                                msg_chat_id = conversation.chat_id
-                        msg_id_inchat = int(re_data[1][1])
-                        await bot.send_message(chat_id, f"{msg_chat_id, msg_id_inchat}")
-                        media_msg = (await bot.get_messages(msg_chat_id, msg_id_inchat))[0]
-                        _data = BytesIO()
+                            msg_chat_id = re_new_data[0]
+                        msg_id_inchat = int(re_new_data[1])
+                        media_msg = await bot.get_messages(msg_chat_id, msg_id_inchat)
                         if media_msg and media_msg.media:
-                            if "tgfile" in type_parse:
-                                await bot.download_file(media_msg.media.document, _data)
-                            else:
-                                await bot.download_file(media_msg.photo, _data)
-                            with open(file_name, "wb") as f:
-                                f.write(_data.getvalue())
+                            await bot.download_media(media_msg, file_name)
                             reply_to = None
                             if "reply" in type_parse:
-                                reply_to = context.id
-                            await bot.send_file(chat_id, file_name, reply_to=reply_to,
-                                                force_document=("tgfile" in type_parse))
+                                reply_to = context.message_id
+                            if "tgfile" in type_parse:
+                                await bot.send_document(chat_id, file_name, reply_to_message_id=reply_to)
+                            else:
+                                await bot.send_photo(chat_id, file_name, reply_to_message_id=reply_to)
                             remove(file_name)
                 elif "plain" in type_parse:
                     if could_send_msg:
                         update_last_time = True
-                        await bot.send_message(chat_id, re_msg, reply_to=None)
+                        await bot.send_message(chat_id, re_msg)
                 elif "reply" in type_parse and chat_id == real_chat_id:
                     if could_send_msg:
                         update_last_time = True
-                        await bot.send_message(chat_id, re_msg, reply_to=context.id)
+                        await bot.send_message(chat_id, re_msg, reply_to_message_id=context.message_id)
                 elif "op" in type_parse:
                     if re_msg == "delete":
                         await context.delete()
@@ -676,7 +671,7 @@ async def funcset(bot, context):
             elif len(cmd) == 2 and cmd[0] == "show":
                 file_path = f"data/keyword_func/{cmd[1]}.py"
                 if path.exists(file_path) and path.isfile(file_path):
-                    await bot.send_file(context.chat.id, file_path)
+                    await bot.send_document(context.chat.id, file_path)
                     await context.edit("发送成功")
                     await del_msg(context, 5)
                 else:
@@ -687,8 +682,8 @@ async def funcset(bot, context):
                 file_path = f"data/keyword_func/{cmd[1]}.py"
                 if path.exists(file_path) and path.isfile(file_path):
                     remove(file_path)
-                    await context.edit("删除成功，PagerMaid-Modify 正在重新启动。")
-                    await bot.disconnect()
+                    await context.edit("删除成功，PagerMaid-Modify Beta 正在重新启动。")
+                    exit()
                 else:
                     await context.edit("函数不存在")
                     await del_msg(context, 5)
@@ -700,12 +695,9 @@ async def funcset(bot, context):
                 cmd[1] = cmd[1].replace(".py", "")
                 if message and message.media:
                     try:
-                        data = BytesIO()
-                        await bot.download_file(message.media.document, data)
-                        with open(f"data/keyword_func/{cmd[1]}.py", "wb") as f:
-                            f.write(data.getvalue())
-                        await context.edit(f"函数 {cmd[1]} 已添加，PagerMaid-Modify 正在重新启动。")
-                        await bot.disconnect()
+                        await bot.download_media(message, f"data/keyword_func/{cmd[1]}.py")
+                        await context.edit(f"函数 {cmd[1]} 已添加，PagerMaid-Modify Beta 正在重新启动。")
+                        exit()
                     except:
                         await context.edit("函数添加失败")
                         await del_msg(context, 5)
@@ -734,8 +726,7 @@ async def funcset(bot, context):
                     else:
                         move(file_path, func_directory)
                     await context.edit(f"函数 {path.basename(file_path)[:-3]} 已添加，PagerMaid-Modify 正在重新启动。")
-                    await log(f"成功安装函数 {path.basename(file_path)[:-3]}.")
-                    await bot.disconnect()
+                    exit()
                 else:
                     await context.edit(f"{func_name} 函数不存在")
                     await del_msg(context, 5)
@@ -760,63 +751,60 @@ async def funcset(bot, context):
 
 
 async def auto_reply(client, context):
-    try:
-        chat_id = context.chat.id
-        sender_id = context.sender_id
-        if f"{chat_id}:{context.id}" not in read_context:
-            plain_dict = get_redis(f"keyword.{chat_id}.plain")
-            regex_dict = get_redis(f"keyword.{chat_id}.regex")
-            g_settings = get_redis("keyword.settings")
-            n_settings = get_redis(f"keyword.{chat_id}.settings")
-            g_mode = g_settings.get("mode", None)
-            n_mode = n_settings.get("mode", None)
-            mode = "0"
-            g_list = g_settings.get("list", None)
-            n_list = n_settings.get("list", None)
-            user_list = []
-            if g_mode and n_mode:
-                mode = n_mode
-            elif g_mode or n_mode:
-                mode = g_mode if g_mode else n_mode
-            if g_list and n_list:
-                user_list = n_list
-            elif g_list or n_list:
-                user_list = g_list if g_list else n_list
-            send_text = context.text
-            if not send_text:
-                send_text = ""
-            for k, v in plain_dict.items():
-                if k in send_text:
-                    tmp = get_redis(f"keyword.{chat_id}.single.plain.{encode(k)}")
-                    could_reply = validate(str(sender_id), int(mode), user_list)
-                    if tmp:
-                        could_reply = validate(str(sender_id), int(tmp.get("mode", "0")), tmp.get("list", []))
-                    if could_reply:
-                        read_context[f"{chat_id}:{context.id}"] = None
-                        await send_reply(client, chat_id, k, "plain", parse_multi(v), context)
-            for k, v in regex_dict.items():
-                pattern = re.compile(k)
-                if pattern.search(send_text):
-                    tmp = get_redis(f"keyword.{chat_id}.single.regex.{encode(k)}")
-                    could_reply = validate(str(sender_id), int(mode), user_list)
-                    if tmp:
-                        could_reply = validate(str(sender_id), int(tmp.get("mode", "0")), tmp.get("list", []))
-                    if could_reply:
-                        read_context[f"{chat_id}:{context.id}"] = None
-                        catch_pattern = r"\$\{regex_(?P<str>((?!\}).)+)\}"
-                        count = 0
-                        while re.search(catch_pattern, v) and count < 20:
-                            search_data = re.search(k, send_text)
-                            group_name = re.search(catch_pattern, v).group("str")
-                            capture_data = get_capture(search_data, group_name)
-                            if not capture_data:
-                                capture_data = ""
-                            if re.search(catch_pattern, capture_data):
-                                capture_data = ""
-                            v = v.replace("${regex_%s}" % group_name, capture_data)
-                            count += 1
-                        await send_reply(client, chat_id, k, "regex", parse_multi(v), context)
-        else:
-            del read_context[f"{chat_id}:{context.id}"]
-    except:
-        pass
+    chat_id = context.chat.id
+    sender_id = context.from_user.id
+    if f"{chat_id}:{context.message_id}" not in read_context:
+        plain_dict = get_redis(f"keyword.{chat_id}.plain")
+        regex_dict = get_redis(f"keyword.{chat_id}.regex")
+        g_settings = get_redis("keyword.settings")
+        n_settings = get_redis(f"keyword.{chat_id}.settings")
+        g_mode = g_settings.get("mode", None)
+        n_mode = n_settings.get("mode", None)
+        mode = "0"
+        g_list = g_settings.get("list", None)
+        n_list = n_settings.get("list", None)
+        user_list = []
+        if g_mode and n_mode:
+            mode = n_mode
+        elif g_mode or n_mode:
+            mode = g_mode if g_mode else n_mode
+        if g_list and n_list:
+            user_list = n_list
+        elif g_list or n_list:
+            user_list = g_list if g_list else n_list
+        send_text = context.text
+        if not send_text:
+            send_text = ""
+        for k, v in plain_dict.items():
+            if k in send_text:
+                tmp = get_redis(f"keyword.{chat_id}.single.plain.{encode(k)}")
+                could_reply = validate(str(sender_id), int(mode), user_list)
+                if tmp:
+                    could_reply = validate(str(sender_id), int(tmp.get("mode", "0")), tmp.get("list", []))
+                if could_reply:
+                    read_context[f"{chat_id}:{context.message_id}"] = None
+                    await send_reply(client, chat_id, k, "plain", parse_multi(v), context)
+        for k, v in regex_dict.items():
+            pattern = re.compile(k)
+            if pattern.search(send_text):
+                tmp = get_redis(f"keyword.{chat_id}.single.regex.{encode(k)}")
+                could_reply = validate(str(sender_id), int(mode), user_list)
+                if tmp:
+                    could_reply = validate(str(sender_id), int(tmp.get("mode", "0")), tmp.get("list", []))
+                if could_reply:
+                    read_context[f"{chat_id}:{context.message_id}"] = None
+                    catch_pattern = r"\$\{regex_(?P<str>((?!\}).)+)\}"
+                    count = 0
+                    while re.search(catch_pattern, v) and count < 20:
+                        search_data = re.search(k, send_text)
+                        group_name = re.search(catch_pattern, v).group("str")
+                        capture_data = get_capture(search_data, group_name)
+                        if not capture_data:
+                            capture_data = ""
+                        if re.search(catch_pattern, capture_data):
+                            capture_data = ""
+                        v = v.replace("${regex_%s}" % group_name, capture_data)
+                        count += 1
+                    await send_reply(client, chat_id, k, "regex", parse_multi(v), context)
+    else:
+        del read_context[f"{chat_id}:{context.message_id}"]

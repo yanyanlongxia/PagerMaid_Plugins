@@ -22,4 +22,4 @@ async def incoming(client, message):
         if redis.get("denied.chat_id." + str(message.chat.id)):
             await message.delete()
     if keyword_incoming:
-        auto_reply(client, message)
+        await auto_reply(client, message)
