@@ -42,7 +42,7 @@
         },
         {
             "name": "incoming",
-            "version": "0.1",
+            "version": "0.11",
             "section": "chat",
             "maintainer": "xtaodada",
             "size": "0.74 kb",

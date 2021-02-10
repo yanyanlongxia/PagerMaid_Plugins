@@ -3,7 +3,8 @@ from main import redis
 from modules.status import redis_status
 from modules.plugin import check_plugin
 
-
+avoid_incoming = False
+keyword_incoming = False
 if check_plugin('avoid'):
     avoid_incoming = True
 if check_plugin('keyword'):
