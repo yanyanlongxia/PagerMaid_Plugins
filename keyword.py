@@ -208,7 +208,9 @@ async def send_reply(bot, chat_id, trigger, mode, reply_msg, context):
                     func_name = re.search(catch_pattern, re_msg).group("str")
                     try:
                         module = import_module(f"data.keyword_func.{func_name}")
+                        context.client = bot
                         func_data = await module.main(context)
+                        os.chdir(working_dir)
                     except:
                         func_data = "[RE]"
                     re_msg = re_msg.replace("${func_%s}" % func_name, str(func_data))
@@ -689,7 +691,7 @@ async def funcset(bot, context):
                     await del_msg(context, 5)
                 return
             elif len(cmd) == 2 and cmd[0] == "new":
-                message = await context.get_reply_message()
+                message = context.reply_to_message
                 if context.media:
                     message = context
                 cmd[1] = cmd[1].replace(".py", "")
@@ -697,6 +699,8 @@ async def funcset(bot, context):
                     try:
                         await bot.download_media(message, f"data/keyword_func/{cmd[1]}.py")
                         await context.edit(f"函数 {cmd[1]} 已添加，PagerMaid-Modify Beta 正在重新启动。")
+                        exit()
+                    except SystemExit:
                         exit()
                     except:
                         await context.edit("函数添加失败")
