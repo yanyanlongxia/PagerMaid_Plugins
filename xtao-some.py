@@ -1,5 +1,6 @@
 """ Pagermaid xtao-some plugin base. """
 import json, requests
+from os import remove
 from urllib.parse import urlparse
 from modules.system import attach_log
 from pyrogram import Client, filters
@@ -155,6 +156,36 @@ async def tx_t(bot, context):
         await attach_log(bot, result, context.chat.id, "translation.txt", context.message_id)
         return
     await context.edit(result)
+
+
+cmd.extend(["getsticker"])
+par.extend([""])
+des.extend(["回复一张贴纸就可以得到它的文件啦。"])
+
+
+@Client.on_message(filters.me & filters.command("getsticker", list(prefix_str)))
+async def getsticker(bot, context):
+    """ PagerMaid getsticker. """
+    reply = context.reply_to_message
+    if reply:
+        if reply.sticker:
+            await context.delete()
+            name = f'{reply.sticker.set_name} - {reply.sticker.emoji} - {reply.sticker.file_name}'
+            caption = name.replace('.webp', '')
+            if reply.sticker.is_animated:
+                name += '.1'
+                caption = '<code>' + name.replace('.tgs.1', '') + '</code>\n' \
+                                                                  '请注意：请手动去除 <code>.1</code> 后缀再上传 tg 既可以发送为动态贴纸。\n' \
+                                                                  '设置 <code>.tgs.1</code> 扩展名是为了避免 <code>tgs</code> ' \
+                                                                  '文件被 <b>Telegram</b> 识别为动态贴纸。'
+            await reply.download(file_name=name)
+            await bot.send_document(context.chat.id, 'downloads/' + name, caption=caption, parse_mode='html',
+                                    force_document=True)
+            remove('downloads/' + name)
+        else:
+            await context.edit("使用方法：回复一张贴纸。")
+    else:
+        await context.edit("使用方法：回复一张贴纸。")
 
 
 async def request_ip(entities):

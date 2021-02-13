@@ -102,13 +102,13 @@
         },
         {
             "name": "xtao-some",
-            "version": "1.14",
+            "version": "1.15",
             "section": "daily",
             "maintainer": "xtaodada",
-            "size": "9 kb",
+            "size": "10.5 kb",
             "supported": true,
             "des-short": "一大堆便民功能。",
-            "des": "超多功能 例如 -ip -ipping -guess -wiki -t 。"
+            "des": "超多功能 例如 -ip -ipping -guess -wiki -t -getsticker 。"
         }
     ]
 }
