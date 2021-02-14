@@ -109,6 +109,16 @@
             "supported": true,
             "des-short": "一大堆便民功能。",
             "des": "超多功能 例如 -ip -ipping -guess -wiki -t -getsticker 。"
+        },
+        {
+            "name": "yb-dl",
+            "version": "1.0",
+            "section": "daily",
+            "maintainer": "xtaodada",
+            "size": "2.1 kb",
+            "supported": false,
+            "des-short": "上传 Youtube、Bilibili 视频到 telegram。",
+            "des": "这个人很懒，什么都没有留下。"
         }
     ]
 }
