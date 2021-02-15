@@ -755,8 +755,11 @@ async def funcset(bot, context):
 
 
 async def auto_reply(client, context):
-    chat_id = context.chat.id
-    sender_id = context.from_user.id
+    try:
+        chat_id = context.chat.id
+        sender_id = context.from_user.id
+    except:
+        return
     if f"{chat_id}:{context.message_id}" not in read_context:
         plain_dict = get_redis(f"keyword.{chat_id}.plain")
         regex_dict = get_redis(f"keyword.{chat_id}.regex")
