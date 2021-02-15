@@ -4,6 +4,7 @@ from os import remove
 from urllib.parse import urlparse
 from modules.system import attach_log
 from pyrogram import Client, filters
+from pyrogram.errors import ChatAdminRequired
 from main import cmd, par, des, prefix_str
 
 cmd.extend(["guess"])
@@ -186,6 +187,29 @@ async def getsticker(bot, context):
             await context.edit("使用方法：回复一张贴纸。")
     else:
         await context.edit("使用方法：回复一张贴纸。")
+
+
+cmd.extend(["getdel"])
+par.extend([""])
+des.extend(["获取当前群组/频道的死号数。"])
+
+
+@Client.on_message(filters.me & filters.command("getdel", list(prefix_str)))
+def getdel(bot, context):
+    """ PagerMaid getdel. """
+    cid = str(context.chat.id)
+    pri = cid.startswith('-100')
+    if pri:
+        member_count = 0
+        try:
+            for member in bot.iter_chat_members(int(cid)):
+                if member.user.is_deleted:
+                    member_count += 1
+            context.edit(f'此频道/群组的死号数：<code>{member_count}</code>')
+        except ChatAdminRequired:
+            context.edit('未加入此频道。')
+    else:
+        context.edit("请在在群组/频道发送。")
 
 
 async def request_ip(entities):

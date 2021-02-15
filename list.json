@@ -102,13 +102,13 @@
         },
         {
             "name": "xtao-some",
-            "version": "1.15",
+            "version": "1.16",
             "section": "daily",
             "maintainer": "xtaodada",
             "size": "10.5 kb",
             "supported": true,
             "des-short": "一大堆便民功能。",
-            "des": "超多功能 例如 -ip -ipping -guess -wiki -t -getsticker 。"
+            "des": "超多功能 例如 ip ipping guess wiki t getsticker getdel。"
         },
         {
             "name": "yb-dl",
