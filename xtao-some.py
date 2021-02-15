@@ -195,21 +195,22 @@ des.extend(["获取当前群组/频道的死号数。"])
 
 
 @Client.on_message(filters.me & filters.command("getdel", list(prefix_str)))
-def getdel(bot, context):
+async def getdel(bot, context):
     """ PagerMaid getdel. """
     cid = str(context.chat.id)
     pri = cid.startswith('-100')
     if pri:
+        await context.edit('遍历成员中。。。')
         member_count = 0
         try:
-            for member in bot.iter_chat_members(int(cid)):
+            async for member in bot.iter_chat_members(int(cid)):
                 if member.user.is_deleted:
                     member_count += 1
-            context.edit(f'此频道/群组的死号数：<code>{member_count}</code>')
+            await context.edit(f'此频道/群组的死号数：<code>{member_count}</code>')
         except ChatAdminRequired:
-            context.edit('未加入此频道。')
+            await context.edit('未加入此频道。')
     else:
-        context.edit("请在在群组/频道发送。")
+        await context.edit("请在在群组/频道发送。")
 
 
 async def request_ip(entities):
