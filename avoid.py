@@ -1,23 +1,18 @@
 """ PagerMaid module for different ways to avoid users. """
 
-from pyrogram import Client, filters
 from main import bot, reg_handler, des_handler, par_handler, redis
 from plugins.status import redis_status
 
 
-@Client.on_message(filters.me & filters.command('ghost', list(prefix_str)))
-async def ghost(client, message):
+async def ghost(message, args, origin_text):
     """ Toggles ghosting of a user. """
     if not redis_status():
         await message.edit("出错了呜呜呜 ~ Redis 好像离线了，无法执行命令。")
         return
-    if not incoming_load:
-        await message.edit(incoming_load_text)
-        return
     if len(message.text.split()) != 2:
         await message.edit("出错了呜呜呜 ~ 无效的参数。")
         return
-    myself = await client.get_me()
+    myself = await bot.get_me()
     self_user_id = myself.id
     if message.text.split()[1] == "true":
         if message.chat.id == self_user_id:
@@ -44,24 +39,15 @@ async def ghost(client, message):
         await message.edit("出错了呜呜呜 ~ 无效的参数。")
 
 
-cmd.extend(['deny'])
-par.extend(['<true|false|status>'])
-des.extend(['拒绝聊天功能，需要 Redis。'])
-
-
-@Client.on_message(filters.me & filters.command('deny', list(prefix_str)))
-async def deny(client, message):
+async def deny(message, args, origin_text):
     """ Toggles denying of a user. """
     if not redis_status():
         await message.edit("出错了呜呜呜 ~ Redis 离线，无法运行。")
         return
-    if not incoming_load:
-        await message.edit(incoming_load_text)
-        return
     if len(message.text.split()) != 2:
         await message.edit("出错了呜呜呜 ~ 无效的参数。")
         return
-    myself = await client.get_me()
+    myself = await bot.get_me()
     self_user_id = myself.id
     if message.text.split()[1] == "true":
         if message.chat.id == self_user_id:
@@ -83,6 +69,10 @@ async def deny(client, message):
     else:
         await message.edit("出错了呜呜呜 ~ 无效的参数。")
 
-cmd.extend(['ghost'])
-par.extend(['<true|false|status>'])
-des.extend(['开启对话的自动已读，需要 Redis。'])
+
+reg_handler('ghost', ghost)
+reg_handler('deny', deny)
+des_handler('ghost', "开启对话的自动已读，需要 Redis。")
+des_handler('deny', '拒绝聊天功能，需要 Redis。')
+par_handler('ghost', '<true|false|status>')
+par_handler('deny', '<true|false|status>')
