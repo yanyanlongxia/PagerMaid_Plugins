@@ -1,14 +1,9 @@
 from asyncio import sleep
 from requests import get
-from pyrogram import Client, filters
-from main import cmd, par, des, prefix_str
+from main import bot, reg_handler, des_handler, par_handler
 
-cmd.extend(["diss", "biss"])
-par.extend(["", ""])
-des.extend(["儒雅随和版祖安语录。", "加带力度版祖安语录。"])
 
-@Client.on_message(filters.me & filters.command("diss", list(prefix_str)))
-async def diss(clinet, message):
+async def diss(message, args, origin_text):
     await message.edit("获取中 . . .")
     status = False
     for _ in range(20):
@@ -25,8 +20,8 @@ async def diss(clinet, message):
         await sleep(2)
         await message.delete()
 
-@Client.on_message(filters.me & filters.command("biss", list(prefix_str)))
-async def biss(client, message):
+
+async def biss(message, args, origin_text):
     await message.edit("获取中 . . .")
     status = False
     for _ in range(20):
@@ -42,3 +37,11 @@ async def biss(client, message):
         await message.edit("出错了呜呜呜 ~ 试了好多好多次都无法访问到 API 服务器 。")
         await sleep(2)
         await message.delete()
+
+
+reg_handler('diss', diss)
+reg_handler('biss', biss)
+des_handler('diss', "儒雅随和版祖安语录。")
+des_handler('diss', '加带力度版祖安语录。')
+par_handler('diss', '')
+par_handler('biss', '')

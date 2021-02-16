@@ -1,16 +1,14 @@
 import re, time, asyncio, requests, os, json
 from sys import exit
-from os import path, mkdir, remove, makedirs
+from os import path, mkdir, remove, makedirs, getcwd
 from shutil import copyfile, move, rmtree
 from uuid import uuid4
 from base64 import b64encode, b64decode
 from importlib import import_module
-from pyrogram import Client, filters
-from main import cmd, par, des, prefix_str, redis
-from modules.plugin import check_require
+from main import bot, reg_handler, des_handler, par_handler, redis
 
 
-incoming_load, incoming_load_text = check_require('incoming', '0.1')
+working_dir = getcwd()
 msg_freq = 1
 group_last_time = {}
 read_context = {}
@@ -306,21 +304,10 @@ async def send_reply(bot, chat_id, trigger, mode, reply_msg, context):
         pass
 
 
-cmd.extend(["keyword", "replyset", "funcset"])
-par.extend(["``new <plain|regex> '<规则>' '<回复信息>'` 或者 `del <plain|regex> '<规则>'` 或者 `list` 或者 "
-            "`clear <plain|regex>", "help", "help"])
-des.extend(["关键词自动回复。", "自动回复设置。", "设置自定义函数。"])
-
-
-@Client.on_message(filters.me & filters.command("keyword", list(prefix_str)))
-async def reply(bot, context):
+async def reply(context, args, origin_text):
     if not redis_status():
         await context.edit("出错了呜呜呜 ~ Redis 离线，无法运行")
         await del_msg(context, 5)
-        return
-    if not incoming_load:
-        await context.edit(incoming_load_text)
-        await del_msg(context, 10)
         return
     context.parameter = context.text.split(" ")[1:]
     chat_id = context.chat.id
@@ -426,15 +413,10 @@ async def reply(bot, context):
         return
 
 
-@Client.on_message(filters.me & filters.command("replyset", list(prefix_str)))
-async def reply_set(bot, context):
+async def reply_set(context, args, origin_text):
     if not redis_status():
         await context.edit("出错了呜呜呜 ~ Redis 离线，无法运行")
         await del_msg(context, 5)
-        return
-    if not incoming_load:
-        await context.edit(incoming_load_text)
-        await del_msg(context, 10)
         return
     context.parameter = context.text.split(" ")[1:]
     chat_id = context.chat.id
@@ -642,12 +624,7 @@ async def reply_set(bot, context):
         return
 
 
-@Client.on_message(filters.me & filters.command("funcset", list(prefix_str)))
-async def funcset(bot, context):
-    if not incoming_load:
-        await context.edit(incoming_load_text)
-        await del_msg(context, 10)
-        return
+async def funcset(context, args, origin_text):
     if not path.exists("data/keyword_func"):
         makedirs("data/keyword_func")
     try:
@@ -815,3 +792,15 @@ async def auto_reply(client, context):
                     await send_reply(client, chat_id, k, "regex", parse_multi(v), context)
     else:
         del read_context[f"{chat_id}:{context.message_id}"]
+
+
+reg_handler('keyword', reply)
+reg_handler('replyset', reply_set)
+reg_handler('funcset', funcset)
+des_handler('keyword', '关键词自动回复。')
+des_handler('replyset', '自动回复设置。')
+des_handler('funcset', '设置自定义函数。')
+par_handler('keyword', "``new <plain|regex> '<规则>' '<回复信息>'` 或者 `del <plain|regex> '<规则>'` 或者 `list` 或者 "
+            "`clear <plain|regex>")
+par_handler('replyset', 'help')
+par_handler('funcset', 'help')

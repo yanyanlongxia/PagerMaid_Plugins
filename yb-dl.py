@@ -4,15 +4,10 @@ from os import remove
 from os.path import exists
 from youtube_dl import YoutubeDL
 from re import compile as regex_compile
-from main import cmd, par, des, prefix_str
-from pyrogram import Client, filters
+from main import bot, reg_handler, des_handler, par_handler
 
-cmd.append("ybdl")
-par.append("<url>.")
-des.append("上传 Youtube、Bilibili 视频到 telegram")
 
-@Client.on_message(filters.me & filters.command("ybdl", list(prefix_str)))
-async def ybdl(client, message):
+async def ybdl(message, args, origin_text):
     url = " ".join(message.text.split(" ")[1:])
     reply = message.reply_to_message
     reply_id = None
@@ -26,15 +21,16 @@ async def ybdl(client, message):
     bilibili_pattern = regex_compile(r"^(http(s)?://)?((w){3}.)?bilibili(\.com)?/.+")
     youtube_pattern = regex_compile(r"^(http(s)?://)?((w){3}.)?youtu(be|.be)?(\.com)?/.+")
     if youtube_pattern.match(url):
-        if not await fetch_video(client, url, message.chat.id, reply_id):
+        if not await fetch_video(bot, url, message.chat.id, reply_id):
             await message.edit("出错了呜呜呜 ~ 视频下载失败。")
         # await log(f"已拉取UTB视频，地址： {url}.")
         await message.edit("视频获取成功！")
     if bilibili_pattern.match(url):
-        if not await fetch_video(client, url, message.chat.id, reply_id):
+        if not await fetch_video(bot, url, message.chat.id, reply_id):
             await message.edit("出错了呜呜呜 ~ 视频下载失败。")
         # await log(f"已拉取 Bilibili 视频，地址： {url}.")
         await message.edit("视频获取成功！")
+
 
 async def fetch_video(client, url, chat_id, reply_id):
     """ Extracts and uploads YouTube video. """
@@ -56,3 +52,8 @@ async def fetch_video(client, url, chat_id, reply_id):
     )
     remove("video.mp4")
     return True
+
+
+reg_handler('ybdl', ybdl)
+des_handler('ybdl', '上传 Youtube、Bilibili 视频到 telegram')
+par_handler('ybdl', '<url>')

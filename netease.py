@@ -4,23 +4,14 @@ from time import sleep
 from os import remove, path
 from os.path import exists
 from collections import defaultdict
-from pyrogram import Client, filters
-from main import cmd, par, des, prefix_str
+from main import bot, reg_handler, des_handler, par_handler
 
 
 class RetryError(Exception):  # 重试错误，用于再次重试
     pass
 
 
-cmd.extend(['nem'])
-par.extend(['<指令> <关键词>'])
-des.extend(["网易云搜/点歌。\n指令s为搜索，p为点歌，id为歌曲ID点歌，r为随机热歌(无关键词)\n"
-            "搜索在s后添加数字如`-nem` `s8` `<关键词>`调整结果数量\n搜索灰色歌曲请尽量**指定歌手**\n"
-            "可回复搜索结果消息`-nem` `p` `<歌曲数字序号>`点歌"])
-
-
-@Client.on_message(filters.me & filters.command('nem', list(prefix_str)))
-async def nem(bot, context):
+async def nem(context, args, origin_text):
     parameter = context.text.split()
     parameter.remove(parameter[0])
     proxies = {}
@@ -520,3 +511,10 @@ async def nem(bot, context):
     else:  # 错误输入
         await context.edit(helptext)
         return
+
+
+reg_handler('nem', nem)
+des_handler('nem', "网易云搜/点歌。\n指令s为搜索，p为点歌，id为歌曲ID点歌，r为随机热歌(无关键词)\n"
+            "搜索在s后添加数字如`-nem` `s8` `<关键词>`调整结果数量\n搜索灰色歌曲请尽量**指定歌手**\n"
+            "可回复搜索结果消息`-nem` `p` `<歌曲数字序号>`点歌")
+par_handler('rate', '<指令> <关键词>')

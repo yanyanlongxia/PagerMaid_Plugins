@@ -1,49 +1,36 @@
 from requests import get
 from os import remove
 from asyncio import sleep
-from pyrogram import Client, filters
 from pyrogram.types import InputMediaPhoto
-from main import cmd, par, des, prefix_str
+from main import bot, reg_handler, des_handler, par_handler
 
 
-cmd.extend(['weather'])
-par.extend(['<城市>'])
-des.extend(['使用彩云天气 api 查询国内实时天气。'])
-
-
-@Client.on_message(filters.me & filters.command('weather', list(prefix_str)))
-async def weather(client, message):
+async def weather(message, args, origin_text):
     await message.edit("获取中 . . .")
     try:
         msg = message.text.split()[1]
     except ValueError:
         await message.edit("出错了呜呜呜 ~ 无效的参数。")
         return
-    await client.send_message('PagerMaid_Modify_bot', f'/weather {msg}')
+    await bot.send_message('PagerMaid_Modify_bot', f'/weather {msg}')
     await sleep(5)
-    await client.read_history('PagerMaid_Modify_bot')
-    async for msg in client.iter_history('PagerMaid_Modify_bot', limit=1):
+    await bot.read_history('PagerMaid_Modify_bot')
+    async for msg in bot.iter_history('PagerMaid_Modify_bot', limit=1):
         weather_text = msg
     await message.edit(weather_text.caption)
 
 
-cmd.extend(['pixiv'])
-par.extend(['[<图片链接>]'])
-des.extend(['查询插画信息。'])
-
-
-@Client.on_message(filters.me & filters.command('pixiv', list(prefix_str)))
-async def pixiv(client, message):
+async def pixiv(message, args, origin_text):
     await message.edit("获取中 . . .")
     try:
         msg = message.text.split()[1]
     except ValueError:
         await message.edit("出错了呜呜呜 ~ 无效的参数。")
         return
-    await client.send_message('PagerMaid_Modify_bot', f'/pixiv_api {msg}')
+    await bot.send_message('PagerMaid_Modify_bot', f'/pixiv_api {msg}')
     await sleep(5)
-    await client.read_history('PagerMaid_Modify_bot')
-    async for msg in client.iter_history('PagerMaid_Modify_bot', limit=1):
+    await bot.read_history('PagerMaid_Modify_bot')
+    async for msg in bot.iter_history('PagerMaid_Modify_bot', limit=1):
         pixiv_text = msg
     pixiv_list = pixiv_text.text.split('|||||')
     if len(pixiv_list) == 2:
@@ -57,7 +44,7 @@ async def pixiv(client, message):
             photo_name = "pixiv." + str(i) + ".jpg"
             pixiv_album.extend([photo_name])
             pixiv_album_pyro.extend([InputMediaPhoto(photo_name, caption=pixiv_list[0])])
-        await client.send_media_group(message.chat.id, pixiv_album_pyro)
+        await bot.send_media_group(message.chat.id, pixiv_album_pyro)
         await message.delete()
         for i in pixiv_album:
             try:
@@ -66,3 +53,11 @@ async def pixiv(client, message):
                 pass
     else:
         await message.edit(pixiv_text)
+
+
+reg_handler('weather', weather)
+reg_handler('pixiv', pixiv)
+des_handler('weather', '使用彩云天气 api 查询国内实时天气。')
+des_handler('pixiv', '查询插画信息。')
+par_handler('weather', '<城市>')
+par_handler('pixiv', '[<图片链接>]')

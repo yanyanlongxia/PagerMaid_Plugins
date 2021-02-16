@@ -2,18 +2,12 @@
 import json, requests
 from os import remove
 from urllib.parse import urlparse
-from modules.system import attach_log
-from pyrogram import Client, filters
+from plugins.system import attach_log
 from pyrogram.errors import ChatAdminRequired
-from main import cmd, par, des, prefix_str
-
-cmd.extend(["guess"])
-par.extend(["upload <filepath>` 或 `download <filepath>"])
-des.extend(["能不能好好说话？ - 拼音首字母缩写释义工具（需要回复一句话）"])
+from main import bot, reg_handler, des_handler, par_handler
 
 
-@Client.on_message(filters.me & filters.command("guess", list(prefix_str)))
-async def guess(bot, context):
+async def guess(context, args, origin_text):
     reply = context.reply_to_message
     await context.edit("获取中 . . .")
     if not reply:
@@ -40,13 +34,7 @@ async def guess(bot, context):
         await context.edit("没有匹配到拼音首字母缩写")
 
 
-cmd.extend(["wiki"])
-par.extend(["<词组>"])
-des.extend(["查询维基百科词条。"])
-
-
-@Client.on_message(filters.me & filters.command("wiki", list(prefix_str)))
-async def wiki(bot, context):
+async def wiki(context, args, origin_text):
     lang = 'zh'
     await context.edit("获取中 . . .")
     try:
@@ -79,13 +67,7 @@ async def wiki(bot, context):
         await context.edit("没有匹配到相关词条")
 
 
-cmd.extend(["ip"])
-par.extend(["<ip/域名>"])
-des.extend(["IPINFO （或者回复一句话）。"])
-
-
-@Client.on_message(filters.me & filters.command("ip", list(prefix_str)))
-async def ipinfo(bot, context):
+async def ipinfo(context, args, origin_text):
     reply = context.reply_to_message
     await context.edit('正在查询中...')
     try:
@@ -98,13 +80,7 @@ async def ipinfo(bot, context):
         await context.edit('没有找到要查询的 ip/域名 ...')
 
 
-cmd.extend(["ipping"])
-par.extend(["<ip/域名>"])
-des.extend(["Ping （或者回复一句话）。"])
-
-
-@Client.on_message(filters.me & filters.command("ipping", list(prefix_str)))
-async def ipping(bot, context):
+async def ipping(context, args, origin_text):
     reply = context.reply_to_message
     await context.edit('正在查询中...')
     try:
@@ -120,13 +96,7 @@ async def ipping(bot, context):
         await context.edit('没有找到要查询的 ip/域名 ...')
 
 
-cmd.extend(["t"])
-par.extend(["<文本>"])
-des.extend(["通过腾讯AI开放平台将目标消息翻译成中文。"])
-
-
-@Client.on_message(filters.me & filters.command("t", list(prefix_str)))
-async def tx_t(bot, context):
+async def tx_t(context, args, origin_text):
     """ PagerMaid universal translator. """
     reply = context.reply_to_message
     message = context.split()
@@ -159,13 +129,7 @@ async def tx_t(bot, context):
     await context.edit(result)
 
 
-cmd.extend(["getsticker"])
-par.extend([""])
-des.extend(["回复一张贴纸就可以得到它的文件啦。"])
-
-
-@Client.on_message(filters.me & filters.command("getsticker", list(prefix_str)))
-async def getsticker(bot, context):
+async def getsticker(context, args, origin_text):
     """ PagerMaid getsticker. """
     reply = context.reply_to_message
     if reply:
@@ -189,13 +153,7 @@ async def getsticker(bot, context):
         await context.edit("使用方法：回复一张贴纸。")
 
 
-cmd.extend(["getdel"])
-par.extend([""])
-des.extend(["获取当前群组/频道的死号数。"])
-
-
-@Client.on_message(filters.me & filters.command("getdel", list(prefix_str)))
-async def getdel(bot, context):
+async def getdel(context, args, origin_text):
     """ PagerMaid getdel. """
     cid = str(context.chat.id)
     pri = cid.startswith('-100')
@@ -278,3 +236,28 @@ async def get_ipping(entities):
                     pinginfo = pinginfo.replace('"', '').replace("\/", '/').replace('\\n', '\n', 7).replace(
                         '\\n', '')
                 return pinginfo
+
+
+reg_handler('guess', guess)
+reg_handler('wiki', wiki)
+reg_handler('ip', ipinfo)
+reg_handler('ipping', ipping)
+reg_handler('t', tx_t)
+reg_handler('getsticker', getsticker)
+reg_handler('getdel', getdel)
+
+des_handler('guess', '能不能好好说话？ - 拼音首字母缩写释义工具（需要回复一句话）')
+des_handler('wiki', '查询维基百科词条。')
+des_handler('ip', 'IPINFO （或者回复一句话）。')
+des_handler('ipping', 'Ping （或者回复一句话）。')
+des_handler('t', '通过腾讯AI开放平台将目标消息翻译成中文。')
+des_handler('getsticker', '回复一张贴纸就可以得到它的文件啦。')
+des_handler('getdel', '获取当前群组/频道的死号数。')
+
+par_handler('guess', '<词组>')
+par_handler('wiki', '<词组>')
+par_handler('ip', '<ip>')
+par_handler('ipping', '<ip>')
+par_handler('t', '<文本>')
+par_handler('getsticker', '')
+des_handler('getdel', '')

@@ -3,13 +3,8 @@
 import asyncio, json
 from json.decoder import JSONDecodeError
 import urllib.request
-from pyrogram import Client, filters
-from main import cmd, par, des, prefix_str
+from main import bot, reg_handler, des_handler, par_handler
 
-
-cmd.extend(['rate'])
-par.extend(['<FROM> <TO> <NB>'])
-des.extend(['货币汇率。'])
 
 API = "https://api.exchangeratesapi.io/latest"
 currencies = []
@@ -37,8 +32,7 @@ def init():
 init()
 
 
-@Client.on_message(filters.me & filters.command('rate', list(prefix_str)))
-async def rate(client, message):
+async def rate(message, args, origin_text):
     while not inited:
         await asyncio.sleep(1)
     if len(message.text.split()) == 1:
@@ -62,3 +56,8 @@ async def rate(client, message):
         await message.edit(f"{TO}不是支持的货币. \n\n支持货币: \n{', '.join(currencies)}")
         return
     await message.edit(f'{FROM} : {TO} = {NB} : {round(data["rates"][TO]/data["rates"][FROM]*NB,2)}')
+
+
+reg_handler('rate', rate)
+des_handler('rate', '货币汇率。')
+par_handler('rate', '<FROM> <TO> <NB>')

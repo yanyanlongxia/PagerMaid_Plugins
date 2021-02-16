@@ -1,15 +1,8 @@
 """ PagerMaid module for different ways to avoid users. """
 
 from pyrogram import Client, filters
-from main import cmd, par, des, prefix_str, redis
-from modules.status import redis_status
-from modules.plugin import check_require
-
-
-incoming_load, incoming_load_text = check_require('incoming', '0.1')
-cmd.extend(['ghost'])
-par.extend(['<true|false|status>'])
-des.extend(['开启对话的自动已读，需要 Redis。'])
+from main import bot, reg_handler, des_handler, par_handler, redis
+from plugins.status import redis_status
 
 
 @Client.on_message(filters.me & filters.command('ghost', list(prefix_str)))
@@ -89,3 +82,7 @@ async def deny(client, message):
             await message.edit("emm...当前对话已从自动拒绝对话列表移除。")
     else:
         await message.edit("出错了呜呜呜 ~ 无效的参数。")
+
+cmd.extend(['ghost'])
+par.extend(['<true|false|status>'])
+des.extend(['开启对话的自动已读，需要 Redis。'])

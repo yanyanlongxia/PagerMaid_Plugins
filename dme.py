@@ -3,40 +3,33 @@ from asyncio import sleep
 from os import path, remove, getcwd
 from os.path import exists
 from PIL import Image
-from pyrogram import Client, filters
 from pyrogram.types import InputMediaPhoto
-from main import cmd, par, des, prefix_str, redis
-from modules.status import redis_status
-
-cmd.extend(['dme'])
-par.extend(['<数量> [文本]'])
-des.extend(['编辑并删除当前对话您发送的特定数量的消息。限制：基于消息 ID 的 1000 条消息，大于 1000 条可能会触发删除消息过快限制。'
-            '入群消息非管理员无法删除。（倒序）当数字足够大时即可实现删除所有消息。'])
+from main import bot, reg_handler, des_handler, par_handler, redis
+from plugins.status import redis_status
 
 
-@Client.on_message(filters.me & filters.command('dme', list(prefix_str)))
-async def selfprune(client, context):
+async def dme(context, args, origin_text):
     """ Deletes specific amount of messages you sent. """
     reply = context.reply_to_message
     if reply and reply.photo:
-        if exists('modules/plugins/dme.jpg'):
-            remove('modules/plugins/dme.jpg')
+        if exists('plugins/plugins/dme.jpg'):
+            remove('plugins/plugins/dme.jpg')
         target_file = reply.photo
-        await client.download_media(reply, file_name=f"{getcwd()}/modules/plugins/dme.jpg")
+        await bot.download_media(reply, file_name=f"{getcwd()}/plugins/plugins/dme.jpg")
         await context.edit("替换图片设置完成。")
     elif reply and reply.sticker:
-        if exists('modules/plugins/dme.jpg'):
-            remove('modules/plugins/dme.jpg')
-        await client.download_media(reply, file_name=f"{getcwd()}/modules/plugins/dme.webp")
-        im = Image.open("modules/plugins/dme.webp")
-        im.save('modules/plugins/dme.png', "png")
-        remove('modules/plugins/dme.webp')
-        target_file = 'modules/plugins/dme.png'
+        if exists('plugins/plugins/dme.jpg'):
+            remove('plugins/plugins/dme.jpg')
+        await bot.download_media(reply, file_name=f"{getcwd()}/plugins/plugins/dme.webp")
+        im = Image.open("plugins/plugins/dme.webp")
+        im.save('plugins/plugins/dme.png', "png")
+        remove('plugins/plugins/dme.webp')
+        target_file = 'plugins/plugins/dme.png'
         await context.edit("替换图片设置完成。")
-    elif path.isfile("modules/plugins/dme.jpg"):
-        target_file = "modules/plugins/dme.jpg"
-    elif path.isfile("modules/plugins/dme.png"):
-        target_file = "modules/plugins/dme.png"
+    elif path.isfile("plugins/plugins/dme.jpg"):
+        target_file = "plugins/plugins/dme.jpg"
+    elif path.isfile("plugins/plugins/dme.png"):
+        target_file = "plugins/plugins/dme.png"
     else:
         target_file = False
         await context.edit("注意：没有图片进行替换。")
@@ -67,7 +60,7 @@ async def selfprune(client, context):
             except:
                 pass
     count_buffer = 0
-    async for message in client.iter_history(context.chat.id):
+    async for message in bot.iter_history(context.chat.id):
         if message.from_user.id == context.from_user.id:
             if count_buffer == count:
                 break
@@ -83,7 +76,7 @@ async def selfprune(client, context):
             elif message.document or message.photo or message.audio or message.video or message.gif:
                 if target_file:
                     if not message.text == dme_msg:
-                        await client.edit_message_media(message.chat.id, message.message_id,
+                        await bot.edit_message_media(message.chat.id, message.message_id,
                                                         InputMediaPhoto(target_file))
                         await message.edit(dme_msg)
                 else:
@@ -100,7 +93,7 @@ async def selfprune(client, context):
             pass
     count -= 1
     count_buffer -= 1
-    notification = await send_prune_notify(client, context, count_buffer, count)
+    notification = await send_prune_notify(bot, context, count_buffer, count)
     await sleep(.5)
     await notification.delete()
 
@@ -112,3 +105,9 @@ async def send_prune_notify(client, context, count_buffer, count):
         + str(count_buffer) + " / " + str(count)
         + " 条消息。"
     )
+
+
+reg_handler('dme', dme)
+des_handler('dme', '编辑并删除当前对话您发送的特定数量的消息。限制：基于消息 ID 的 1000 条消息，大于 1000 条可能会触发删除消息过快限制。'
+            '入群消息非管理员无法删除。（倒序）当数字足够大时即可实现删除所有消息。')
+par_handler('dme', '<数量> [文本]')

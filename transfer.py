@@ -1,7 +1,6 @@
 import asyncio, zipfile, os
 from os.path import exists, isfile
-from pyrogram import Client, filters
-from main import cmd, par, des, prefix_str
+from main import bot, reg_handler, des_handler, par_handler
 
 
 time = 0
@@ -52,13 +51,7 @@ async def updown_progress(current, total, *argv):
         await argv[0].edit(text + str(100 * download / size)[:5] + ' %')
 
 
-cmd.extend(["transfer"])
-par.extend(["upload <filepath>` 或 `download <filepath>"])
-des.extend(["上传 / 下载文件。"])
-
-
-@Client.on_message(filters.me & filters.command("transfer", list(prefix_str)))
-async def transfer(bot, context):
+async def transfer(context, args, origin_text):
     global time
     time = 0
     params = context.text.split(" ")[1:]
@@ -103,3 +96,8 @@ async def transfer(bot, context):
     else:
         await context.edit("未知命令")
         await del_msg(context, 3)
+
+
+reg_handler('transfer', transfer)
+des_handler('transfer', '上传 / 下载文件。')
+par_handler('transfer', 'upload <filepath>` 或 `download <filepath>')
