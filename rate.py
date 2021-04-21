@@ -1,73 +1,81 @@
-""" Pagermaid currency exchange rates plugin. Plugin by @fruitymelon and @xtaodada """
+""" Pagermaid currency exchange rates plugin. Plugin by @fruitymelon and @xtaodada"""
 
-import sys
+import asyncio, json, time
+from json.decoder import JSONDecodeError
 import urllib.request
-from main import bot, reg_handler, des_handler, par_handler
+from pagermaid.listener import listener
+from pagermaid import log
 
-imported = True
-API = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"
+API = "https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies.json"
 currencies = []
-rates = {}
+data = {}
+
+inited = False
 
 
 def init():
-    with urllib.request.urlopen(API) as response:
-        result = response.read()
-        try:
-            global rate_data, rates
-            rate_data = xmltodict.parse(result)
-            rate_data = rate_data['gesmes:Envelope']['Cube']['Cube']['Cube']
-            for i in rate_data:
-                currencies.append(i['@currency'])
-                rates[i['@currency']] = float(i['@rate'])
-            currencies.sort()
-        except Exception as e:
-            raise e
-
-
-try:
-    import xmltodict
-
-    init()
-except ImportError:
-    imported = False
-
-
-def logsync(message):
-    sys.stdout.writelines(f"{message}\n")
-
-
-logsync("rate: loading... If failed, please install xmltodict first.")
-
-
-async def rate(message, args, origin_text):
-    if not imported:
-        await context.edit("请先安装依赖：`python3 -m pip install xmltodict`\n随后，请重启 pagermaid beta 。")
-        return
-    if len(message.text.split()) == 1:
-        await message.edit(
-            f"这是货币汇率插件\n\n使用方法: `-rate <FROM> <TO> <NB>`\n\n支持货币: \n{', '.join(currencies)}")
-        return
-    if len(message.text.split()) != 4:
-        await message.edit(f"使用方法: `-rate <FROM> <TO> <NB>`\n\n支持货币: \n{', '.join(currencies)}")
-        return
-    FROM = message.text.split()[1].upper().strip()
-    TO = message.text.split()[2].upper().strip()
+  with urllib.request.urlopen(API) as response:
+    result = response.read()
     try:
-        NB = float(message.text.split()[3].strip())
-    except:
-        NB = 1.0
-    if currencies.count(FROM) == 0:
-        await message.edit(
-            f"{FROM}不是支持的货币. \n\n支持货币: \n{', '.join(currencies)}")
-        return
-    if currencies.count(TO) == 0:
-        await message.edit(f"{TO}不是支持的货币. \n\n支持货币: \n{', '.join(currencies)}")
-        return
-    rate_num = round(rates[TO] / rates[FROM] * NB, 2)
-    await message.edit(f'{FROM} : {TO} = {NB} : {rate_num}')
+      global data
+      data = json.loads(result)
+      for key in list(enumerate(data)):
+        currencies.append(key[1].upper())
+      currencies.sort()
+    except JSONDecodeError as e:
+      raise e
+    global inited
+    inited = True
 
 
-reg_handler('rate', rate)
-des_handler('rate', '货币汇率。')
-par_handler('rate', '<FROM> <TO> <NB>')
+init()
+last_init = time.time()
+
+@listener(incoming=True, ignore_edited=True)
+async def refresher(context):
+  if time.time() - last_init > 24 * 60 * 60:
+    # we'd better do this to prevent ruining the log file with massive fail logs
+    # as this `refresher` would be called frequently
+    last_init = time.time()
+    try:
+      init()
+    except Exception as e:
+      await log(f"Warning: plugin rate failed to refresh rates data. {e}")
+
+@listener(is_plugin=True, outgoing=True, command="rate",
+          description="Currency exchange rate plugin.",
+          parameters="<FROM> <TO> <NUM>")
+async def rate(context):
+  if not inited:
+    init()
+  if not inited:
+    return
+  if not context.parameter:
+    await context.edit(
+      f"This is the currency exchange rate plugin.\n\nUsage: `-rate <FROM> <TO> <NUM>` where `<NUM>` is optional\n\nAvailable currencies: \n`{', '.join(currencies)}`\n\nData are updated daily, for encrypted currencies we recommend to use the `bc` plugin.")
+    return
+  NB = 1.0
+  if len(context.parameter) != 3:
+    if len(context.parameter) != 2:
+      await context.edit(f"Usage: `-rate <FROM> <TO> <NUM>` where `<NUM>` is optional\n\nAvailable currencies: \n`{', '.join(currencies)}`\n\nData are updated daily, for encrypted currencies we recommend to use the `bc` plugin.")
+      return
+  FROM = context.parameter[0].upper().strip()
+  TO = context.parameter[1].upper().strip()
+  try:
+    NB = NB if len(context.parameter) == 2 else float(context.parameter[2].strip())
+  except:
+    NB = 1.0
+  if currencies.count(FROM) == 0:
+    await context.edit(f"Currency type {FROM} is not supported. Choose one among `{', '.join(currencies)}` instead.")
+    return
+  if currencies.count(TO) == 0:
+    await context.edit(f"Currency type {TO} is not supported. Choose one among `{', '.join(currencies)}` instead.")
+    return
+  endpoint = f"https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/{FROM.lower()}/{TO.lower()}.json"
+  with urllib.request.urlopen(endpoint) as response:
+    result = response.read()
+    try:
+      rate_data = json.loads(result)
+      await context.edit(f'`{FROM} : {TO} = {NB} : {round(NB * rate_data[TO.lower()], 4)}`\n\nData are updated daily.')
+    except Exception as e:
+      await context.edit(str(e))
