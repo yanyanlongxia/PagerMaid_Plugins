@@ -2,13 +2,13 @@
     "list": [
         {
             "name": "rate",
-            "version": "1.22",
+            "version": "1.31",
             "section": "daily",
             "maintainer": "fruitymelon",
-            "size": "2.3 kb",
+            "size": "2.9 kb",
             "supported": true,
             "des-short": "汇率转换。",
-            "des": "这个人很懒，什么都没有留下。"
+            "des": "Currencies exchange rate plugin."
         },
         {
             "name": "vip",
