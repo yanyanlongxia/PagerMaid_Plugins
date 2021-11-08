@@ -14,12 +14,13 @@ from pagermaid.utils import alias_command
 
 
 positions = {
-    "1": [300, 24]
+    "1": [307, 20]
 }
 max_number = 1
 
 
 def eat_it(base, mask, photo, number):
+    mask = mask.resize((183, 183), Image.LANCZOS)
     mask_size = mask.size
     photo_size = photo.size
     if mask_size[0] < photo_size[0] and mask_size[1] < photo_size[1]:
@@ -102,7 +103,7 @@ async def turn(context):
                     bg.write(re.content)
             if not exists('plugins/turn/mask' + str(num) + '.png'):
                 re = get(
-                    'https://raw.githubusercontent.com/dompling/PagerMaid_Plugins/master/turn/mask'+str(num)+".png")
+                    'https://raw.githubusercontent.com/FlowerSilent/Photo/master/photo/mask3.png')
                 with open('plugins/turn/mask' + str(num) + '.png', 'wb') as ms:
                     ms.write(re.content)
         number = randint(1, max_number)
@@ -115,6 +116,7 @@ async def turn(context):
         if diu_round:
             markImg = markImg.rotate(180)  # 对图片进行旋转
         await context.edit(f"绿幕尺寸：{maskImg.size}")
+        await context.edit(f"头像尺寸：{markImg.size}")
         try:
             result = eat_it(eatImg, maskImg, markImg, number)
         except Exception as e:
