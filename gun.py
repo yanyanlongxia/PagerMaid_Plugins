@@ -20,7 +20,7 @@ max_number = 1
 
 
 def eat_it(base, mask, photo, number):
-    mask = mask.resize((183, 183), Image.LANCZOS)
+    mask = mask.resize((184, 184), Image.LANCZOS)
     mask_size = mask.size
     photo_size = photo.size
     if mask_size[0] < photo_size[0] and mask_size[1] < photo_size[1]:
