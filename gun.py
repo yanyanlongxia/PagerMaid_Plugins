@@ -20,7 +20,7 @@ max_number = 1
 
 
 def eat_it(base, mask, photo, number):
-    mask = mask.resize((183, 183), Image.LANCZOS)
+    mask = mask.resize((184, 184), Image.LANCZOS)
     mask_size = mask.size
     photo_size = photo.size
     if mask_size[0] < photo_size[0] and mask_size[1] < photo_size[1]:
@@ -103,7 +103,7 @@ async def turn(context):
                     bg.write(re.content)
             if not exists('plugins/turn/mask' + str(num) + '.png'):
                 re = get(
-                    'https://raw.githubusercontent.com/FlowerSilent/Photo/master/photo/mask3.png')
+                    'https://raw.githubusercontent.com/dompling/PagerMaid_Plugins/master/turn/mask1'+str(num)+".jpg")
                 with open('plugins/turn/mask' + str(num) + '.png', 'wb') as ms:
                     ms.write(re.content)
         number = randint(1, max_number)
