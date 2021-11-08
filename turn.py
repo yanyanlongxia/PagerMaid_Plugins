@@ -14,9 +14,9 @@ from pagermaid.utils import alias_command
 
 
 positions = {
-    "1": [297, 288]
+    "1": [317, 100]
 }
-max_number = 5
+max_number = 1
 
 
 def eat_it(base, mask, photo, number):
@@ -39,15 +39,15 @@ def eat_it(base, mask, photo, number):
     return base
 
 
-@listener(is_plugin=True, outgoing=True, command=alias_command("eat"),
-          description="生成一张 吃头像 图片，（可选：当第二个参数存在时，旋转用户头像 180°）",
+@listener(is_plugin=True, outgoing=True, command=alias_command("gun"),
+          description="生成一张 踢人图片，（可选：当第二个参数存在时，旋转用户头像 180°）",
           parameters="<username/uid> [随意内容]")
-async def eat(context):
+async def turn(context):
     if len(context.parameter) > 2:
         await context.edit("出错了呜呜呜 ~ 无效的参数。")
         return
     diu_round = False
-    await context.edit("正在生成 吃头像 图片中 . . .")
+    await context.edit("正在生成 踢人 图片中 . . .")
     if context.reply_to_msg_id:
         reply_message = await context.get_reply_message()
         try:
@@ -88,39 +88,40 @@ async def eat(context):
             raise exception
     photo = await context.client.download_profile_photo(
         target_user.user.id,
-        "plugins/eat/" + str(target_user.user.id) + ".jpg",
+        "plugins/turn/" + str(target_user.user.id) + ".jpg",
         download_big=True
     )
     reply_to = context.message.reply_to_msg_id
-    if exists("plugins/eat/" + str(target_user.user.id) + ".jpg"):
+    if exists("plugins/turn/" + str(target_user.user.id) + ".jpg"):
         for num in range(1, max_number + 1):
             print(num)
-            if not exists('plugins/eat/eat' + str(num) + '.png'):
+            if not exists('plugins/turn/turn' + str(num) + '.png'):
                 re = get(
-                    'https://raw.githubusercontent.com/FlowerSilent/Photo/master/photo/turn1' + str(num) + '.png')
-                with open('plugins/eat/eat' + str(num) + '.png', 'wb') as bg:
+                    'https://raw.githubusercontent.com/dompling/PagerMaid_Plugins/master/turn/turn' + str(num) + '.png')
+                with open('plugins/turn/turn' + str(num) + '.png', 'wb') as bg:
                     bg.write(re.content)
-            if not exists('plugins/eat/mask' + str(num) + '.png'):
+            if not exists('plugins/turn/mask' + str(num) + '.png'):
                 re = get(
-                    'https://raw.githubusercontent.com/FlowerSilent/Photo/master/photo/mask' + str(num) + '.png')
-                with open('plugins/eat/mask' + str(num) + '.png', 'wb') as ms:
+                    'https://raw.githubusercontent.com/FlowerSilent/Photo/master/photo/mask3.png')
+                with open('plugins/turn/mask' + str(num) + '.png', 'wb') as ms:
                     ms.write(re.content)
         number = randint(1, max_number)
         markImg = Image.open(
-            "plugins/eat/" + str(target_user.user.id) + ".jpg")
-        eatImg = Image.open("plugins/eat/eat" + str(number) + ".png")
-        maskImg = Image.open("plugins/eat/mask" + str(number) + ".png")
+            "plugins/turn/" + str(target_user.user.id) + ".jpg")
+        eatImg = Image.open("plugins/turn/turn" + str(number) + ".png")
+        maskImg = Image.open("plugins/turn/mask" + str(number) + ".png")
         if len(context.parameter) == 2:
             diu_round = True
         if diu_round:
             markImg = markImg.rotate(180)  # 对图片进行旋转
+        await context.edit(f"绿幕尺寸：{maskImg.size}")
         result = eat_it(eatImg, maskImg, markImg, number)
-        result.save('plugins/eat/eat.webp')
-        target_file = await context.client.upload_file("plugins/eat/eat.webp")
+        result.save('plugins/turn/turn.webp')
+        target_file = await context.client.upload_file("plugins/turn/turn.webp")
         try:
-            remove("plugins/eat/" + str(target_user.user.id) + ".jpg")
-            remove("plugins/eat/" + str(target_user.user.id) + ".png")
-            remove("plugins/eat/eat.webp")
+            remove("plugins/turn/" + str(target_user.user.id) + ".jpg")
+            remove("plugins/turn/" + str(target_user.user.id) + ".png")
+            remove("plugins/turn/turn.webp")
             remove(photo)
         except:
             pass
@@ -137,7 +138,7 @@ async def eat(context):
                 reply_to=reply_to
             )
             await context.delete()
-            remove("plugins/eat/eat.webp")
+            remove("plugins/turn/turn.webp")
             try:
                 remove(photo)
             except:
@@ -156,7 +157,7 @@ async def eat(context):
                 force_document=False
             )
             await context.delete()
-            remove("plugins/eat/eat.webp")
+            remove("plugins/turn/turn.webp")
             try:
                 remove(photo)
             except:
