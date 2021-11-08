@@ -14,12 +14,13 @@ from pagermaid.utils import alias_command
 
 
 positions = {
-    "1": [317, 100]
+    "1": [300, 24]
 }
 max_number = 1
 
 
 def eat_it(base, mask, photo, number):
+    mask = mask.resize((183, 183), Image.LANCZOS)
     mask_size = mask.size
     photo_size = photo.size
     if mask_size[0] < photo_size[0] and mask_size[1] < photo_size[1]:
@@ -115,7 +116,11 @@ async def turn(context):
         if diu_round:
             markImg = markImg.rotate(180)  # 对图片进行旋转
         await context.edit(f"绿幕尺寸：{maskImg.size}")
-        result = eat_it(eatImg, maskImg, markImg, number)
+        await context.edit(f"头像尺寸：{markImg.size}")
+        try:
+            result = eat_it(eatImg, maskImg, markImg, number)
+        except Exception as e:
+            await context.edit(f"错误：{e}")
         result.save('plugins/turn/turn.webp')
         target_file = await context.client.upload_file("plugins/turn/turn.webp")
         try:
